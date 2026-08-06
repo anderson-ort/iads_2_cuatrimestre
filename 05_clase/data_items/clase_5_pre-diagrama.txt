@@ -1,0 +1,17 @@
+graph TD
+    A[Consulta: 'Busco algo fresco para un vestido hoy en Córdoba'] --> B{Motor de Extracción / LLM}
+    
+    B -->|Filtro Duro SQL| C[Metadatos: sucursal='filial_cordoba' AND stock=true]
+    B -->|Filtro Blando| D[Vectorización: 'tela fresca para vestido']
+    
+    C --> E[(ChromaDB: Colección Ortelana)]
+    D --> E
+    
+    E -->|1. Filtra por Metadatos| F[Sub-catálogo: TELA-002, TELA-004, TELA-006]
+    F -->|2. Busca por Similitud Angular| G[Top 1: TELA-002 Seda Natural]
+    
+    G --> H[Respuesta al Usuario]
+    
+    style E fill:#005088,stroke:#11caa0,stroke-width:4px,color:#fff
+    style C fill:#f3f0df,stroke:#333
+    style D fill:#f3f0df,stroke:#333

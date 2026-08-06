@@ -1,0 +1,14 @@
+Killer Query 1 (Tags):
+
+"Quiero armar unas fundas para los sillones de casa que aguanten a los perros".
+
+(El vector buscará telas gruesas, pero el filtro duro linea_textil == 'tapiceria'
+asegurará que Chroma no le recomiende Denim de indumentaria, y el tag "sillón"
+confirmará el match).
+
+Killer Query 2 (Metadato salvador):
+"Necesito urgente armar un toldo de PVC para un camión en Buenos Aires".
+
+(El vector va a encontrar la TELA-003 con similitud casi perfecta, pero como
+en_stock == false, ChromaDB devolverá un error controlado o sugerirá otra cosa
+en lugar de hacerle prometer al cliente algo que no hay).
