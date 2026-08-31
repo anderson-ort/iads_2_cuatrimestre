@@ -1,0 +1,52 @@
+[
+  {
+    "id": "TELA-001",
+    "descripcion_semantica": "Denim pesado de 12 oz, 100% algodón rígido con teñido índigo intenso. Tacto rústico, alta resistencia al roce y cuerpo firme. Ideal para camperas y pantalones de trabajo.",
+    "metadatos": {
+      "linea_textil": "indumentaria",
+      "sucursal_disponible": "central_buenos_aires",
+      "en_stock": true,
+      "tags_regionales": ["jean", "vaquero", "mezclilla", "ropa de trabajo"]
+    }
+  },
+  {
+    "id": "TELA-002",
+    "descripcion_semantica": "Seda natural con acabado satinado, caída fluida y brillo sofisticado. Tejido muy liviano y fresco al tacto, diseñado para vestidos de gala.",
+    "metadatos": {
+      "linea_textil": "alta_costura",
+      "sucursal_disponible": "filial_cordoba",
+      "en_stock": true,
+      "tags_regionales": ["seda", "satin", "fiesta", "gala"]
+    }
+  },
+  {
+    "id": "TELA-003",
+    "descripcion_semantica": "Lona cobertora industrial con recubrimiento de PVC impermeable. Entramado de poliéster de alta tenacidad, nula flexibilidad y máxima resistencia al agua.",
+    "metadatos": {
+      "linea_textil": "industrial",
+      "sucursal_disponible": "central_buenos_aires",
+      "en_stock": false,
+      "tags_regionales": ["cobertor", "impermeable", "toldo", "camion"]
+    }
+  },
+  {
+    "id": "TELA-004",
+    "descripcion_semantica": "Gabardina elastizada de 8 oz. Mezcla de algodón y spandex que otorga comodidad sin perder estructura. Textura diagonal clásica, ideal para pantalones de vestir.",
+    "metadatos": {
+      "linea_textil": "indumentaria",
+      "sucursal_disponible": "filial_cordoba",
+      "en_stock": true,
+      "tags_regionales": ["gabardina", "pantalón", "spandex"]
+    }
+  },
+  {
+    "id": "TELA-005",
+    "descripcion_semantica": "Chenille de tapicería aterciopelado. Tejido grueso con tratamiento antimanchas, diseñado para soportar el roce constante en muebles de interior.",
+    "metadatos": {
+      "linea_textil": "tapiceria",
+      "sucursal_disponible": "filial_cordoba",
+      "en_stock": true,
+      "tags_regionales": ["tapizados", "sillón", "antimanchas"]
+    }
+  }
+]
