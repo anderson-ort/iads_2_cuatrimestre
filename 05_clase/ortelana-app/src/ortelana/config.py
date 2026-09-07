@@ -19,7 +19,7 @@ class Settings(BaseSettings):
 
     # Infraestructura
     MONGODB_URI: str = Field(default="mongodb://localhost:27017")
-    MONGODB_DATABASE: str = Field(default="ortelana_db")
+    MONGODB_DATABASE: str = Field(default="ortelana-app-database")
     CHROMADB_HOST: str = Field(default="localhost")
     CHROMADB_PORT: int = Field(default=8000)
 

@@ -15,4 +15,5 @@ def get_mongo_client() -> MongoClient:
 def get_products_collection() -> Collection:
     client = get_mongo_client()
     db = client[settings.MONGODB_DATABASE]
-    return db["products"]
+    print(db)
+    return db["catalogo"]

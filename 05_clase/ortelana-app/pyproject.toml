@@ -1,0 +1,28 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "ortelana"
+version = "0.1.0"
+description = "Sistema RAG tipado con Pydantic para el catálogo de Ortelana Textil"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "chromadb>=1.5.9",
+    "cohere>=7.1.1",
+    "google-genai>=2.22.0",
+    "pydantic>=2.13.5",
+    "pydantic-settings>=2.15.0",
+    "pymongo>=4.18.0",
+    "python-dotenv>=1.2.3",
+    "rich>=15.0.0",
+    "typer>=0.27.2",
+]
+
+
+[project.scripts]
+ortelana = "ortelana.cli:app"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/ortelana"]

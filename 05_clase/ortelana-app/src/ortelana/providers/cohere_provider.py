@@ -1,4 +1,5 @@
 import json
+import re
 from typing import List, Type, TypeVar
 import cohere
 from pydantic import BaseModel
@@ -21,19 +22,37 @@ class CohereLLMProvider(BaseLLMProvider):
 
         response = self.client.chat(model=self.model, messages=messages)
         return response.message.content[0].text
-
+    
     def extract_structured(self, prompt: str, response_schema: Type[T]) -> T:
+        
         schema_json = response_schema.model_json_schema()
+    
         system_instruction = (
-            f"Responde strictly en JSON cumpliendo este esquema Pydantic: "
-            f"{json.dumps(schema_json)}"
+            "Eres un extractor de datos estructurados. "
+            "Genera un objeto JSON que cumpla estrictamente el esquema especificado."
         )
-        raw_response = self.generate_response(prompt, system_instruction)
-        clean_json = (
-            raw_response.strip().removeprefix("```json").removesuffix("```").strip()
+    
+        messages = [
+            {"role": "system", "content": system_instruction},
+            {"role": "user", "content": prompt},
+        ]
+    
+        # Pasamos json_schema dentro de response_format para forzar las claves exactas
+        response = self.client.chat(
+            model=self.model,
+            messages=messages,
+            response_format={
+                "type": "json_object",
+                "json_schema": schema_json,  # <--- Clave para forzar la estructura de Pydantic
+            },
         )
+    
+        raw_response = response.message.content[0].text
+    
+        match = re.search(r"\{.*\}", raw_response, re.DOTALL)
+        clean_json = match.group(0) if match else raw_response.strip()
+    
         return response_schema.model_validate_json(clean_json)
-
 
 class CohereEmbeddingProvider(BaseEmbeddingProvider):
     def __init__(self):

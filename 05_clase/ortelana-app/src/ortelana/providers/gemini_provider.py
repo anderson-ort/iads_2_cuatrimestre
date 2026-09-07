@@ -35,15 +35,23 @@ class GeminiLLMProvider(BaseLLMProvider):
 
 
 class GeminiEmbeddingProvider(BaseEmbeddingProvider):
+
     def __init__(self):
         self.client = genai.Client(api_key=settings.GEMINI_API_KEY)
         self.model = settings.GEMINI_EMBED_MODEL
 
     def embed_text(self, text: str) -> List[float]:
         response = self.client.models.embed_content(
-            model=self.model, contents=text
+            model=self.model, contents=text,
+            config=types.EmbedContentConfig(output_dimensionality=768),
         )
-        return response.embedding.values
+        # Acceso corregido a través de la lista response.embeddings
+        return response.embeddings[0].values
 
     def embed_batch(self, texts: List[str]) -> List[List[float]]:
-        return [self.embed_text(t) for t in texts]
+        # La API de Gemini acepta la lista de textos directamente en una sola llamada
+        response = self.client.models.embed_content(
+            model=self.model, contents=texts,
+            config=types.EmbedContentConfig(output_dimensionality=768),
+        )
+        return [e.values for e in response.embeddings]

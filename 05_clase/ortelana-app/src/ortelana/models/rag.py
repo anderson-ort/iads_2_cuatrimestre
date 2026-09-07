@@ -1,14 +1,15 @@
-from typing import List, Optional
+from typing import List, Literal, Optional
 from pydantic import BaseModel, Field
 from ortelana.models.product import Product
 
 
 class QueryRoute(BaseModel):
-    intent: str = Field(
-        description="Ruta de la consulta: 'PRODUCT', 'DOCUMENT' o 'HYBRID'"
+    intent: Literal["PRODUCT", "DOCUMENT", "HYBRID"] = Field(
+        description="Clasificación de la consulta: PRODUCT (telas, precios, stock), DOCUMENT (envíos, pagos, trámites) o HYBRID (ambas)."
     )
     reasoning: Optional[str] = Field(
-        default=None, description="Explicación de la clasificación"
+        default=None,
+        description="Breve justificación en una frase sobre la decisión tomada.",
     )
 
 
