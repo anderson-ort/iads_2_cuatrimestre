@@ -297,32 +297,21 @@ for chunk in cadena_avanzada.stream("¿Qué función cumplen los Sentence Transf
 print("\n")
 ```
 
+
+**Diferencias  entre el [lanchain 03](./code-sample/03_langchain.py) y [lanchain 03](./code-sample/03_langchain.py)**
+
+| Característica | Script 1 (Avanzado / Streaming) | Script 2 (Estándar / Batch) |
+| --- | --- | --- |
+| **Formateo de Contexto** | Aplica una función custom `format_docs` para concatenar el contenido de los documentos con separadores (`---`). | Pasa el `retriever` directamente en el diccionario, dejando que LangChain convierta automáticamente los objetos `Document` a texto. |
+| **Construcción LCEL** | Utiliza `RunnableParallel` de forma explícita para estructurar el flujo de datos en paralelo. | Utiliza sintaxis de diccionario nativo `{"context": ..., "question": ...}` (que LCEL convierte internamente a `RunnableParallel`). |
+| **Generación de Salida** | Usa **`stream()`**: imprime la respuesta token por token a medida que el LLM la genera. | Usa **`invoke()`**: espera a que el modelo termine de generar la respuesta completa para mostrarla de golpe. |
+| **Temperatura del LLM** | `0.2` (da un margen mínimo de variabilidad/creatividad en la redacción). | `0.1` (focalizado en respuestas deterministas y de menor variación). |
+| **Enfoque del Prompt** | Solicita una respuesta analítica sin restricciones estrictas de respuesta vacía. | Restringe fuertemente al modelo a responder un texto por defecto si la información no está presente. |
+
+
+
 ---
 
-### Ejercicio 5: Integración Empresarial con Vertex AI (GCP)
-*(Referencia Teórica: Sección 1.5 y 1.7)*
 
-Ejemplo de configuración para entornos empresariales en Google Cloud Platform utilizando autenticación basada en IAM y proyectos Vertex AI.
 
-```python
-from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.output_parsers import StrOutputParser
 
-# Configuración empresarial para GCP Vertex AI (Sección 1.5)
-llm_vertex = ChatGoogleGenerativeAI(
-    model="gemini-2.5-pro",
-    vertexai=True,
-    project="tu-proyecto-gcp-id",
-    location="us-central1",
-    temperature=0.2
-)
-
-prompt = ChatPromptTemplate.from_template("Genera un resumen ejecutivo sobre: {tema}")
-
-cadena_enterprise = prompt | llm_vertex | StrOutputParser()
-
-# Invocación (requiere autenticación previa con gcloud auth application-default login)
-# respuesta = cadena_enterprise.invoke({"tema": "Adopción de RAG en la nube empresarial"})
-# print(respuesta)
-```

@@ -29,34 +29,3 @@ messages = [
 # 5. Invocar al modelo de Liquid AI
 response = chat_model.invoke(messages)
 print(response.content)
-
-
-
-
-# import os
-# from langchain_google_genai import ChatGoogleGenerativeAI
-# from langchain_core.messages import SystemMessage, HumanMessage
-# 
-# # Configuración de API Key (se recomienda mediante variable de entorno GOOGLE_API_KEY)
-# API_KEY = os.getenv("GOOGLE_API_KEY", "TU_API_KEY_AQUI")
-# 
-# # Inicialización del LLM (Sección 1.5)
-# llm = ChatGoogleGenerativeAI(
-    # model="gemini-2.5-flash",
-    # google_api_key=API_KEY,
-    # temperature=0.3
-# )
-# 
-# # Definición de mensajes estructurados (Sección 1.2)
-# messages = [
-    # SystemMessage(content="Eres un asistente especializado en arquitectura de software en la nube."),
-    # HumanMessage(content="¿Cuáles son las ventajas de desincorporar monolitos a microservicios?")
-# ]
-# 
-# # Invocación directa del modelo
-# response = llm.invoke(messages)
-# 
-# print("--- Respuesta de Gemini 2.5 Flash ---")
-# print(response.content)
-
-
