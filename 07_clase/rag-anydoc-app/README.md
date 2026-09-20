@@ -1,0 +1,1 @@
+# Ingester multi embedding_provider

@@ -1,0 +1,36 @@
+[project]
+name = "ortelana-naive-rag"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "firecrawl-anydoc>=0.2.4",
+    "langchain-chroma>=1.1.0",
+    "langchain-cohere>=0.6.0",
+    "langchain-core>=1.6.3",
+    "langchain-google-genai>=4.4.0",
+    "langchain-huggingface>=1.2.2",
+    "langchain-text-splitters>=1.1.2",
+    "sentence-transformers>=6.1.0",
+    "streamlit>=1.64.0",
+    "torchvision>=0.29.0",
+]
+
+[project.scripts]
+start = "run:start"
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.uv]
+package = true
+
+# --- INCLUIR TANTO EL ARCHIVO RUN.PY COMO EL PAQUETE INGESTER ---
+[tool.setuptools]
+py-modules = ["run"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["ingester*"]
