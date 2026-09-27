@@ -9,11 +9,8 @@ ANY_DOC_APP = Path(__file__).resolve().parents[2] / "rag-anydoc-app"
 if str(ANY_DOC_APP) not in sys.path:
     sys.path.insert(0, str(ANY_DOC_APP))
 
-from ingester.embeddings import (
-    HuggingFaceEmbeddingProvider,
-    GeminiEmbeddingProvider,
-    CohereEmbeddingProvider,
-)
+from ingester.config import load_config as load_ingester_config
+from ingester.services import build_vector_manager as build_ingester_vector_manager
 from ingester.vectorstore import VectorStoreManager
 
 from config import load_config
@@ -21,42 +18,39 @@ from retrieval import CrossEncoderReranker, CohereReranker, Reranker
 from router_chain import build_router_chain
 from rag_chain import build_rag_chain
 
-# El config.toml de esta app es la unica fuente de verdad de sus parametros.
+# El config.toml de esta app es la unica fuente de verdad de sus parametros
+# (LLM, reranker, retrieval). El vectorstore, en cambio, se toma del
+# config.toml de rag-anydoc-app para no desalinear la busqueda de la ingesta.
 CONFIG_PATH = Path(__file__).resolve().parents[1] / "config.toml"
-
-# (clase, seccion del config.toml, requiere api key)
-EMBEDDING_PROVIDERS = {
-    "huggingface": (HuggingFaceEmbeddingProvider, "huggingface", False),
-    "gemini": (GeminiEmbeddingProvider, "gemini", True),
-    "cohere": (CohereEmbeddingProvider, "cohere", True),
-}
-
-
-def build_embedding_provider(provider_key: str, api_key: str):
-    cls, section, requires_api_key = EMBEDDING_PROVIDERS[provider_key]
-    model_name = load_config(CONFIG_PATH)[section]["model_name"]
-    kwargs = {"model_name": model_name}
-    if requires_api_key:
-        if not api_key:
-            raise ValueError(f"El proveedor '{provider_key}' requiere una API key.")
-        kwargs["api_key"] = api_key
-    return cls(**kwargs)
+INGESTER_CONFIG_PATH = ANY_DOC_APP / "config.toml"
 
 
 def build_vector_manager(provider_key: str, api_key: str) -> VectorStoreManager:
-    cfg = load_config(CONFIG_PATH)
+    """Reutiliza la logica del ingester: el mapeo provider -> coleccion,
+    dimensiones y modelo sale del config.toml de rag-anydoc-app. Asi la
+    busqueda abre exactamente el vectorstore que creo la ingesta."""
+    cfg = load_ingester_config(INGESTER_CONFIG_PATH)
     # persist_dir es relativo a rag-anydoc-app, no al CWD actual.
-    persist_dir = str((ANY_DOC_APP / cfg["vectorstore"]["persist_dir"]).resolve())
-    provider = build_embedding_provider(provider_key, api_key)
-    return VectorStoreManager(
-        embedding_provider=provider,
-        persist_dir=persist_dir,
-        collection_name=cfg["vectorstore"]["collection_name"],
+    cfg["vectorstore"]["persist_dir"] = str(
+        (ANY_DOC_APP / cfg["vectorstore"]["persist_dir"]).resolve()
     )
+    return build_ingester_vector_manager(provider_key, api_key, cfg)
 
 
 def build_vectorstore(provider_key: str, api_key: str) -> Chroma:
     return build_vector_manager(provider_key, api_key).get_vectorstore()
+
+
+def _collection_summary(manager: VectorStoreManager) -> dict:
+    """Nombre de la coleccion y cantidad de chunks que se van a consultar.
+    Sirve para detectar si se eligio un provider distinto al de la ingesta:
+    en ese caso Chroma abre una coleccion vacia y el retrieval no devuelve nada."""
+    stats = manager.get_stats()
+    return {
+        "collection_name": manager.collection_name,
+        "total_chunks": stats["total_chunks"],
+        "total_files": stats["total_files"],
+    }
 
 
 def build_reranker(nombre: str, cohere_api_key: str) -> Reranker:
@@ -114,7 +108,9 @@ def build_components(
     from schemas import RagAnswer
 
     cfg = load_config(CONFIG_PATH)
-    vectorstore = build_vectorstore(provider_key, embedding_api_key)
+    manager = build_vector_manager(provider_key, embedding_api_key)
+    vectorstore = manager.get_vectorstore()
+    collection = _collection_summary(manager)
     reranker = build_reranker(reranker_nombre, cohere_api_key)
     router = build_router_chain(
         api_key=google_api_key,
@@ -132,6 +128,7 @@ def build_components(
 
     return {
         "vectorstore": vectorstore,
+        "collection": collection,
         "reranker": reranker,
         "router": router,
         "rag_structured_llm": rag_structured_llm,

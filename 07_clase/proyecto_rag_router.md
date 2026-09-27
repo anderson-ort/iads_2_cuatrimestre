@@ -7,6 +7,8 @@ rag-inference-app/
 ├── app.py                # UI Streamlit (presenter del flujo compartido)
 ├── cli.py                # CLI Typer + Rich (presenter del flujo compartido)
 ├── config.toml           # única fuente de verdad de parámetros
+├── .env.sample           # plantilla de claves de API (se versiona)
+├── .env                  # claves reales (NO se versiona)
 ├── pyproject.toml
 └── src/
     ├── config.py
@@ -118,6 +120,58 @@ Así `from ingester.vectorstore import VectorStoreManager` funciona sin instalar
 
 Chroma no admite vectores de distinta dimensión en una misma colección. Hay que usar **el mismo proveedor con el que se ingestaron** los documentos o la búsqueda de similitud falla (o devuelve basura). Por eso en la UI el selector de embeddings va acompañado de una nota, y el `GeminiEmbeddingProvider` / `CohereEmbeddingProvider` piden su API key.
 
+## Fix: el retrieval usa la misma colección con la que se ingestó
+
+Antes, `rag-inference-app/src/services.py` armaba el vectorstore con su propio
+`config.toml`: un único `collection_name = "anydoc_collection"` (que no existía)
+y un `persist_dir` (`./database/chroma_db`) que resolvía a una ruta inexistente.
+La ingesta, en cambio, elige la colección **por proveedor**
+(`rag-anydoc-app/ingester/services.py`):
+
+| Provider | Modelo | Dims | Colección |
+| --- | --- | --- | --- |
+| huggingface | all-MiniLM-L6-v2 | 384 | `anydoc_huggingface_384` |
+| gemini | gemini-embedding-001 | 768 | `anydoc_gemini_768` |
+| cohere | embed-multilingual-light-v3.0 | 384 | `anydoc_cohere_384` |
+
+Como el retrieval abría otra colección, la búsqueda devolvía vacío (o fallaba por
+dimensión). Además el provider de Gemini no recibía `dimensions` (3072 vs 768) y
+el `model_name` de Cohere de inferencia (`embed-multilingual-v3.0`, 1024 dims) no
+coincidía con el de la ingesta (`embed-multilingual-light-v3.0`, 384 dims).
+
+Ahora `build_vector_manager()` de inferencia **delega en
+`ingester.services.build_vector_manager`** y lee `persist_dir`, `collection_name`,
+`model_name` y `dimensions` del `config.toml` de `rag-anydoc-app`, resolviendo
+`persist_dir` a absoluto. Una sola fuente de verdad: elegir el mismo provider en
+la ingesta y en la inferencia abre exactamente la misma colección.
+
+Cambios:
+
+* `src/services.py`: se eliminan `EMBEDDING_PROVIDERS` y
+  `build_embedding_provider`; `build_vector_manager` delega en el ingester.
+  `build_components` devuelve una clave nueva `"collection"` con
+  `{collection_name, total_chunks, total_files}`.
+* `app.py` / `cli.py`: muestran la colección en uso y avisan si está vacía (señal
+  de que se eligió un provider distinto al de la ingesta).
+* `config.toml` de inferencia: se quitan `[gemini]`, `[cohere]`, `[huggingface]` y
+  `[vectorstore]`, que ya no se usan (`[embeddings].default_provider` se mantiene).
+
+## `mock_tools.py`: placeholder funcional del tool real
+
+`mock_tools.py` es la rama no-RAG del router (`stock` / `promociones`). En el
+árbol de trabajo había quedado incompleto: le faltaban las constantes `MOCK_STOCK`
+/ `MOCK_PROMOS` y la asignación `cantidad = MOCK_STOCK.get(p)`, por lo que
+cualquier consulta de stock o promociones lanzaba `NameError` en el Paso 3. Se
+restauró el contenido funcional.
+
+El módulo queda marcado como **STUB** (docstring nuevo): la firma
+`consultar_stock(ConsultaProducto) -> StockAnswer` (y su par de promociones) es el
+punto de enchufe del tool real. Cuando exista la base, se reemplaza el cuerpo por
+la consulta correspondiente sin tocar `pipeline.py`, el router ni los esquemas.
+
+No se tocó `schemas.py`, `router_chain.py`, `prompts.py`, `pipeline.py`, `app.py`
+ni `cli.py`: el evento `Tool` y el enum `Intent` siguen igual.
+
 ## Capa de presentación didáctica (paso a paso)
 
 El flujo ya **no** usa las cadenas compuestas (`router | rag_chain`) directamente para responder. Esa orquestación manual vive ahora en `src/pipeline.py` y la comparten los dos entrypoints: `app.py` (Streamlit) y `cli.py` (Typer + Rich). Cada uno es solo un *presenter* que traduce los mismos eventos a su medio (widgets en pantalla o paneles/tablas en la terminal). Las etapas que emite el flujo son:
@@ -187,6 +241,37 @@ La decisión de mostrar u ocultar los pasos es del *presenter* (el método `hand
 
 `app.py` y `cli.py` viven en la raíz, mientras que los módulos están en `src/`. Ambos entrypoints agregan `src/` a `sys.path` al inicio (los módulos de `src/` se importan "planos": `from config import ...`). El `pyproject.toml` declara ahora `typer`, `rich` y `streamlit` y usa `[tool.uv] package = false`, porque la app son scripts planos y no un paquete instalable.
 
+## Claves de API: `.env` en `rag-inference-app`
+
+HuggingFace descarga el modelo localmente y no necesita clave, pero Cohere
+(embeddings) y el reranker de Cohere sí. Para no pasarlas por flag o por la barra
+lateral en cada corrida, `rag-inference-app` tiene su propio `.env`:
+
+* `.env.sample` — plantilla versionada.
+* `.env` — copia local con las claves reales (ignorada por git vía `.gitignore` raíz).
+
+```bash
+cd rag-inference-app
+cp .env.sample .env   # y completar las claves
+```
+
+Variables (mismos nombres que usa el ingester):
+
+| Variable | Para qué | Requerida |
+| --- | --- | --- |
+| `GOOGLE_API_KEY` | LLM del router + generación RAG (Gemini) | sí |
+| `GEMINI_API_KEY` | provider de embeddings de Gemini | solo si usás Gemini |
+| `COHERE_API_KEY` | embeddings de Cohere **y** reranker de Cohere | solo si usás Cohere |
+
+`src/config.py` ejecuta `load_dotenv(<rag-inference-app>/.env)` al importarse, con
+`override=False`: si una variable ya está definida en el shell, esa gana. Después:
+
+* `app.py` pre-carga los `st.text_input` de cada clave con `os.environ.get(...)`.
+* `cli.py` completa `--embedding-api-key` / `--cohere-api-key` desde el entorno
+  cuando no se pasan por flag (el `--google-api-key` ya usaba `envvar=GOOGLE_API_KEY`).
+
+La dependencia `python-dotenv` se agregó al `pyproject.toml` de inferencia.
+
 ## Cómo ejecutar
 
 ```bash
@@ -196,17 +281,23 @@ uv run start            # o: streamlit run app.py
 
 # 2) Asistente de preguntas, modo paso a paso (UI Streamlit)
 cd ../rag-inference-app
+cp .env.sample .env     # completar GOOGLE_API_KEY y (si aplica) COHERE_API_KEY
 streamlit run app.py    # o: uv run streamlit run app.py
 
 # 3) Alternativa CLI (Typer + Rich), mismo flujo paso a paso
-GOOGLE_API_KEY=... uv run python cli.py                     # REPL (salir para terminar)
-GOOGLE_API_KEY=... uv run python cli.py "cuanto stock hay de notebook"
-GOOGLE_API_KEY=... uv run python cli.py "como funciona el router" --no-mostrar-pasos
+uv run python cli.py                     # REPL (salir para terminar)
+uv run python cli.py "cuanto stock hay de notebook"
+uv run python cli.py "como funciona el router" --no-mostrar-pasos
 
 ```
 
+> El CLI toma `GOOGLE_API_KEY` (y `COHERE_API_KEY` / `GEMINI_API_KEY`) del `.env`.
+> Los flags `--google-api-key`, `--embedding-api-key` y `--cohere-api-key` siguen
+> disponibles y tienen prioridad sobre el entorno.
+
 ## Pendiente / siguiente paso natural
 
+* `mock_tools.py` es un STUB: reemplazar `MOCK_STOCK` / `MOCK_PROMOS` por el tool real (SQL/DB) cuando la base esté disponible, manteniendo la firma `ConsultaProducto -> *Answer`.
 * Guardrails reales: hoy `guardrail_check()` solo valida que la pregunta no esté vacía. El hook ya está listo para enchufar NeMo Guardrails / Llama Guard o patrones prohibidos sobre `RagAnswer.respuesta` antes de mostrarla.
 * Historial conversacional con memoria (hoy cada pregunta es independiente).
 * Cuando se migre a FastAPI, `ConsultaProducto` y `RouterDecision` sirven tal cual como modelos de request/response de los endpoints.

@@ -10,6 +10,7 @@ Ejemplos:
     uv run python cli.py "como funciona el router" --no-mostrar-pasos
 """
 
+import os
 import sys
 from pathlib import Path
 from typing import Optional
@@ -171,6 +172,14 @@ def main(
         console.print("[red]Falta GOOGLE_API_KEY en el entorno.[/]")
         raise typer.Exit(code=1)
 
+    # Completa las keys faltantes desde rag-inference-app/.env (cargado por config.py).
+    if not embedding_api_key:
+        embedding_api_key = os.environ.get(
+            "GEMINI_API_KEY" if provider == "gemini" else "COHERE_API_KEY", ""
+        )
+    if not cohere_api_key:
+        cohere_api_key = os.environ.get("COHERE_API_KEY", "")
+
     with console.status("[bold]Cargando modelos y cadenas...[/]"):
         componentes = build_components(
             google_api_key=google_api_key,
@@ -179,6 +188,18 @@ def main(
             reranker_nombre=reranker,
             cohere_api_key=cohere_api_key,
         )
+
+    info = componentes["collection"]
+    console.print(
+        f"[dim]Coleccion en uso: {info['collection_name']} · "
+        f"{info['total_chunks']} chunks · {info['total_files']} archivos[/]"
+    )
+    if info["total_chunks"] == 0:
+        console.print(
+            "[yellow]La coleccion seleccionada esta vacia. Elegi el mismo "
+            "proveedor de embeddings con el que ingestaste los documentos.[/]"
+        )
+
     presenter = RichPresenter(mostrar_pasos)
 
     if pregunta:

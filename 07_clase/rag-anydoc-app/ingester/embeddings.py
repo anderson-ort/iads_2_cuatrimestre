@@ -12,8 +12,9 @@ class IEmbeddingProvider(ABC):
 
 
 class HuggingFaceEmbeddingProvider(IEmbeddingProvider):
-    def __init__(self, model_name):
+    def __init__(self, model_name, dimensions: int | None = None):
         self.model_name = model_name
+        self.dimensions = dimensions
 
     def get_embeddings(self) -> Embeddings:
         return HuggingFaceEmbeddings(
@@ -24,20 +25,25 @@ class HuggingFaceEmbeddingProvider(IEmbeddingProvider):
 
 
 class GeminiEmbeddingProvider(IEmbeddingProvider):
-    def __init__(self, model_name:str, api_key: str):
+    def __init__(self, model_name:str, api_key: str, dimensions: int | None = None):
         self.api_key = api_key
         self.model_name = model_name
+        self.dimensions = dimensions
 
     def get_embeddings(self) -> Embeddings:
         if not self.api_key:
             raise ValueError("Se requiere una API Key válida para Gemini.")
-        return GoogleGenerativeAIEmbeddings(model=self.model_name, google_api_key=self.api_key)
+        kwargs = {"model": self.model_name, "google_api_key": self.api_key}
+        if self.dimensions:
+            kwargs["output_dimensionality"] = self.dimensions
+        return GoogleGenerativeAIEmbeddings(**kwargs)
 
 
 class CohereEmbeddingProvider(IEmbeddingProvider):
-    def __init__(self, model_name:str, api_key: str):
+    def __init__(self, model_name:str, api_key: str, dimensions: int | None = None):
         self.api_key = api_key
         self.model_name = model_name
+        self.dimensions = dimensions
 
     def get_embeddings(self) -> Embeddings:
         if not self.api_key:

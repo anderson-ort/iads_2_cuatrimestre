@@ -2,3 +2,5 @@
 .venv
 *.db
 *.duckdb
+__pycache__
+

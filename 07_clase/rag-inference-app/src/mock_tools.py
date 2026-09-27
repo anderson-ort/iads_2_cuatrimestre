@@ -1,3 +1,11 @@
+"""Herramientas mock para las ramas 'stock' y 'promociones' del router.
+
+STUB: hoy devuelven datos hardcodeados para poder ejecutar el flujo completo sin
+una base de datos. La firma de cada funcion (ConsultaProducto -> *Answer) es el
+punto de enchufe del tool real: cuando exista la base, se reemplaza el cuerpo por
+la consulta correspondiente sin tocar pipeline.py, el router ni los esquemas.
+"""
+
 from schemas import ConsultaProducto, StockAnswer, PromoAnswer
 
 # TODO: reemplazar por consultas reales a la DB/API de stock y promociones.

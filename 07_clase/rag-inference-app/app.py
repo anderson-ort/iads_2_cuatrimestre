@@ -84,9 +84,17 @@ with st.sidebar:
 
     embedding_api_key = ""
     if provider_key == "gemini":
-        embedding_api_key = st.text_input("Gemini API key (embeddings)", type="password")
+        embedding_api_key = st.text_input(
+            "Gemini API key (embeddings)",
+            type="password",
+            value=os.environ.get("GEMINI_API_KEY", ""),
+        )
     elif provider_key == "cohere":
-        embedding_api_key = st.text_input("Cohere API key (embeddings)", type="password")
+        embedding_api_key = st.text_input(
+            "Cohere API key (embeddings)",
+            type="password",
+            value=os.environ.get("COHERE_API_KEY", ""),
+        )
 
     google_api_key = st.text_input(
         "Google API key (LLM)",
@@ -103,7 +111,11 @@ with st.sidebar:
 
     cohere_api_key = ""
     if reranker_key == "cohere":
-        cohere_api_key = st.text_input("Cohere API key (rerank)", type="password")
+        cohere_api_key = st.text_input(
+            "Cohere API key (rerank)",
+            type="password",
+            value=os.environ.get("COHERE_API_KEY", ""),
+        )
 
     st.caption(
         "El proveedor de embeddings debe ser el mismo con el que se ingestaron "
@@ -138,6 +150,18 @@ try:
 except Exception as e:
     st.error(f"No se pudo inicializar el pipeline: {e}")
     st.stop()
+
+info_coleccion = componentes["collection"]
+st.caption(
+    f"Coleccion en uso: `{info_coleccion['collection_name']}` · "
+    f"{info_coleccion['total_chunks']} chunks · "
+    f"{info_coleccion['total_files']} archivos"
+)
+if info_coleccion["total_chunks"] == 0:
+    st.warning(
+        "La coleccion seleccionada esta vacia. Elegi el mismo proveedor de "
+        "embeddings con el que ingestaste los documentos."
+    )
 
 if "historial" not in st.session_state:
     st.session_state.historial = []

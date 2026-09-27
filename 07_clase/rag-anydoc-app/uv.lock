@@ -2013,7 +2013,7 @@ wheels = [
 [[package]]
 name = "ortelana-naive-rag"
 version = "0.1.0"
-source = { editable = "." }
+source = { virtual = "." }
 dependencies = [
     { name = "firecrawl-anydoc" },
     { name = "langchain-chroma" },
@@ -2022,9 +2022,12 @@ dependencies = [
     { name = "langchain-google-genai" },
     { name = "langchain-huggingface" },
     { name = "langchain-text-splitters" },
+    { name = "python-dotenv" },
+    { name = "rich" },
     { name = "sentence-transformers" },
     { name = "streamlit" },
     { name = "torchvision" },
+    { name = "typer" },
 ]
 
 [package.metadata]
@@ -2036,9 +2039,12 @@ requires-dist = [
     { name = "langchain-google-genai", specifier = ">=4.4.0" },
     { name = "langchain-huggingface", specifier = ">=1.2.2" },
     { name = "langchain-text-splitters", specifier = ">=1.1.2" },
+    { name = "python-dotenv", specifier = ">=1.0.0" },
+    { name = "rich", specifier = ">=13.7.0" },
     { name = "sentence-transformers", specifier = ">=6.1.0" },
     { name = "streamlit", specifier = ">=1.64.0" },
     { name = "torchvision", specifier = ">=0.29.0" },
+    { name = "typer", specifier = ">=0.12.0" },
 ]
 
 [[package]]

@@ -18,18 +18,7 @@ crossencoder_model = "cross-encoder/ms-marco-MiniLM-L-6-v2"
 cohere_model = "rerank-multilingual-v3.0"
 
 [embeddings]
+# El modelo y la coleccion de cada provider no se definen aca: se leen del
+# config.toml de rag-anydoc-app (provider -> model_name/dimensions/collection_name)
+# para que el retrieval use exactamente el vectorstore que creo la ingesta.
 default_provider = "huggingface"
-
-[gemini]
-model_name = "gemini-embedding-001"
-
-[cohere]
-model_name = "embed-multilingual-v3.0"
-
-[huggingface]
-# model_name = "sentence-transformers/paraphrase-multilingual-mpnet-base-v2"
-model_name = "sentence-transformers/all-MiniLM-L6-v2"
-
-[vectorstore]
-persist_dir = "./database/chroma_db"
-collection_name = "anydoc_collection"

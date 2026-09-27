@@ -1,6 +1,6 @@
 [app]
 title = "Ingestador RAG (Powered by AnyDoc)"
-categories = ["promociones", "técnico", "general"]
+categories = ["promociones", "técnico", "stock", "general"]
 
 [chunking]
 default_size = 800
@@ -11,14 +11,19 @@ max_size = 2000
 
 [gemini]
 model_name = "gemini-embedding-001"
+dimensions = 768
+collection_name = "anydoc_gemini_768"
 
 [cohere]
-model_name = "embed-multilingual-v3.0"
+model_name = "embed-multilingual-light-v3.0"
+dimensions = 384
+collection_name = "anydoc_cohere_384"
 
 [huggingface]
 # model_name = "sentence-transformers/paraphrase-multilingual-mpnet-base-v2"
 model_name = "sentence-transformers/all-MiniLM-L6-v2"
+dimensions = 384
+collection_name = "anydoc_huggingface_384"
 
 [vectorstore]
-persist_dir = "./database/chroma_db"
-collection_name = "anydoc_collection"
+persist_dir = "../database/chroma_db"
