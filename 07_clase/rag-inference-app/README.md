@@ -122,11 +122,7 @@ Chroma no admite vectores de distinta dimensión en una misma colección. Hay qu
 
 ## Fix: el retrieval usa la misma colección con la que se ingestó
 
-Antes, `rag-inference-app/src/services.py` armaba el vectorstore con su propio
-`config.toml`: un único `collection_name = "anydoc_collection"` (que no existía)
-y un `persist_dir` (`./database/chroma_db`) que resolvía a una ruta inexistente.
-La ingesta, en cambio, elige la colección **por proveedor**
-(`rag-anydoc-app/ingester/services.py`):
+Antes, `rag-inference-app/src/services.py` armaba el vectorstore con su propio `config.toml`: un único `collection_name = "anydoc_collection"` (que no existía) y un `persist_dir` (`./database/chroma_db`) que resolvía a una ruta inexistente. La ingesta, en cambio, elige la colección **por proveedor** (`rag-anydoc-app/ingester/services.py`):
 
 | Provider | Modelo | Dims | Colección |
 | --- | --- | --- | --- |
@@ -134,43 +130,23 @@ La ingesta, en cambio, elige la colección **por proveedor**
 | gemini | gemini-embedding-001 | 768 | `anydoc_gemini_768` |
 | cohere | embed-multilingual-light-v3.0 | 384 | `anydoc_cohere_384` |
 
-Como el retrieval abría otra colección, la búsqueda devolvía vacío (o fallaba por
-dimensión). Además el provider de Gemini no recibía `dimensions` (3072 vs 768) y
-el `model_name` de Cohere de inferencia (`embed-multilingual-v3.0`, 1024 dims) no
-coincidía con el de la ingesta (`embed-multilingual-light-v3.0`, 384 dims).
+Como el retrieval abría otra colección, la búsqueda devolvía vacío (o fallaba por dimensión). Además el provider de Gemini no recibía `dimensions` (3072 vs 768) y el `model_name` de Cohere de inferencia (`embed-multilingual-v3.0`, 1024 dims) no coincidía con el de la ingesta (`embed-multilingual-light-v3.0`, 384 dims).
 
-Ahora `build_vector_manager()` de inferencia **delega en
-`ingester.services.build_vector_manager`** y lee `persist_dir`, `collection_name`,
-`model_name` y `dimensions` del `config.toml` de `rag-anydoc-app`, resolviendo
-`persist_dir` a absoluto. Una sola fuente de verdad: elegir el mismo provider en
-la ingesta y en la inferencia abre exactamente la misma colección.
+Ahora `build_vector_manager()` de inferencia **delega en `ingester.services.build_vector_manager`** y lee `persist_dir`, `collection_name`, `model_name` y `dimensions` del `config.toml` de `rag-anydoc-app`, resolviendo `persist_dir` a absoluto. Una sola fuente de verdad: elegir el mismo provider en la ingesta y en la inferencia abre exactamente la misma colección.
 
 Cambios:
 
-* `src/services.py`: se eliminan `EMBEDDING_PROVIDERS` y
-  `build_embedding_provider`; `build_vector_manager` delega en el ingester.
-  `build_components` devuelve una clave nueva `"collection"` con
-  `{collection_name, total_chunks, total_files}`.
-* `app.py` / `cli.py`: muestran la colección en uso y avisan si está vacía (señal
-  de que se eligió un provider distinto al de la ingesta).
-* `config.toml` de inferencia: se quitan `[gemini]`, `[cohere]`, `[huggingface]` y
-  `[vectorstore]`, que ya no se usan (`[embeddings].default_provider` se mantiene).
+* `src/services.py`: se eliminan `EMBEDDING_PROVIDERS` y `build_embedding_provider`; `build_vector_manager` delega en el ingester. `build_components` devuelve una clave nueva `"collection"` con `{collection_name, total_chunks, total_files}`.
+* `app.py` / `cli.py`: muestran la colección en uso y avisan si está vacía (señal de que se eligió un provider distinto al de la ingesta).
+* `config.toml` de inferencia: se quitan `[gemini]`, `[cohere]`, `[huggingface]` y `[vectorstore]`, que ya no se usan (`[embeddings].default_provider` se mantiene).
 
 ## `mock_tools.py`: placeholder funcional del tool real
 
-`mock_tools.py` es la rama no-RAG del router (`stock` / `promociones`). En el
-árbol de trabajo había quedado incompleto: le faltaban las constantes `MOCK_STOCK`
-/ `MOCK_PROMOS` y la asignación `cantidad = MOCK_STOCK.get(p)`, por lo que
-cualquier consulta de stock o promociones lanzaba `NameError` en el Paso 3. Se
-restauró el contenido funcional.
+`mock_tools.py` es la rama no-RAG del router (`stock` / `promociones`). En el árbol de trabajo había quedado incompleto: le faltaban las constantes `MOCK_STOCK` / `MOCK_PROMOS` y la asignación `cantidad = MOCK_STOCK.get(p)`, por lo que cualquier consulta de stock o promociones lanzaba `NameError` en el Paso 3. Se restauró el contenido funcional.
 
-El módulo queda marcado como **STUB** (docstring nuevo): la firma
-`consultar_stock(ConsultaProducto) -> StockAnswer` (y su par de promociones) es el
-punto de enchufe del tool real. Cuando exista la base, se reemplaza el cuerpo por
-la consulta correspondiente sin tocar `pipeline.py`, el router ni los esquemas.
+El módulo queda marcado como **STUB** (docstring nuevo): la firma `consultar_stock(ConsultaProducto) -> StockAnswer` (y su par de promociones) es el punto de enchufe del tool real. Cuando exista la base, se reemplaza el cuerpo por la consulta correspondiente sin tocar `pipeline.py`, el router ni los esquemas.
 
-No se tocó `schemas.py`, `router_chain.py`, `prompts.py`, `pipeline.py`, `app.py`
-ni `cli.py`: el evento `Tool` y el enum `Intent` siguen igual.
+No se tocó `schemas.py`, `router_chain.py`, `prompts.py`, `pipeline.py`, `app.py` ni `cli.py`: el evento `Tool` y el enum `Intent` siguen igual.
 
 ## Capa de presentación didáctica (paso a paso)
 
@@ -243,9 +219,7 @@ La decisión de mostrar u ocultar los pasos es del *presenter* (el método `hand
 
 ## Claves de API: `.env` en `rag-inference-app`
 
-HuggingFace descarga el modelo localmente y no necesita clave, pero Cohere
-(embeddings) y el reranker de Cohere sí. Para no pasarlas por flag o por la barra
-lateral en cada corrida, `rag-inference-app` tiene su propio `.env`:
+HuggingFace descarga el modelo localmente y no necesita clave, pero Cohere (embeddings) y el reranker de Cohere sí. Para no pasarlas por flag o por la barra lateral en cada corrida, `rag-inference-app` tiene su propio `.env`:
 
 * `.env.sample` — plantilla versionada.
 * `.env` — copia local con las claves reales (ignorada por git vía `.gitignore` raíz).
@@ -263,12 +237,10 @@ Variables (mismos nombres que usa el ingester):
 | `GEMINI_API_KEY` | provider de embeddings de Gemini | solo si usás Gemini |
 | `COHERE_API_KEY` | embeddings de Cohere **y** reranker de Cohere | solo si usás Cohere |
 
-`src/config.py` ejecuta `load_dotenv(<rag-inference-app>/.env)` al importarse, con
-`override=False`: si una variable ya está definida en el shell, esa gana. Después:
+`src/config.py` ejecuta `load_dotenv(<rag-inference-app>/.env)` al importarse, con `override=False`: si una variable ya está definida en el shell, esa gana. Después:
 
 * `app.py` pre-carga los `st.text_input` de cada clave con `os.environ.get(...)`.
-* `cli.py` completa `--embedding-api-key` / `--cohere-api-key` desde el entorno
-  cuando no se pasan por flag (el `--google-api-key` ya usaba `envvar=GOOGLE_API_KEY`).
+* `cli.py` completa `--embedding-api-key` / `--cohere-api-key` desde el entorno cuando no se pasan por flag (el `--google-api-key` ya usaba `envvar=GOOGLE_API_KEY`).
 
 La dependencia `python-dotenv` se agregó al `pyproject.toml` de inferencia.
 
@@ -291,9 +263,7 @@ uv run python cli.py "como funciona el router" --no-mostrar-pasos
 
 ```
 
-> El CLI toma `GOOGLE_API_KEY` (y `COHERE_API_KEY` / `GEMINI_API_KEY`) del `.env`.
-> Los flags `--google-api-key`, `--embedding-api-key` y `--cohere-api-key` siguen
-> disponibles y tienen prioridad sobre el entorno.
+> El CLI toma `GOOGLE_API_KEY` (y `COHERE_API_KEY` / `GEMINI_API_KEY`) del `.env`. Los flags `--google-api-key`, `--embedding-api-key` y `--cohere-api-key` siguen disponibles y tienen prioridad sobre el entorno.
 
 ## Pendiente / siguiente paso natural
 
@@ -302,3 +272,4 @@ uv run python cli.py "como funciona el router" --no-mostrar-pasos
 * Historial conversacional con memoria (hoy cada pregunta es independiente).
 * Cuando se migre a FastAPI, `ConsultaProducto` y `RouterDecision` sirven tal cual como modelos de request/response de los endpoints.
 * Si en algún momento se quiere volver a la versión "solo respuesta final" sin tocar nada, alcanza con dejar destildado "Mostrar el paso a paso interno" en la barra lateral (o usar `--no-mostrar-pasos` en el CLI): el pipeline se ejecuta igual, solo cambia que no se despliegan los `st.status` de cada etapa.
+

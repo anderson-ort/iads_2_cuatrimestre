@@ -1,0 +1,68 @@
+# Parámetros del RAG simple (rag_simple.py).
+# Las rutas relativas se resuelven desde esta carpeta (.muestra_clase/).
+
+[run]
+modo = "all"                      # ingest | query | stats | all
+
+[embeddings]
+provider = "huggingface"          # huggingface | gemini | cohere
+
+[huggingface]
+model_name = "sentence-transformers/all-MiniLM-L6-v2"
+collection_name = "anydoc_huggingface_384"
+
+[gemini]
+model_name = "gemini-embedding-001"
+dimensions = 768
+collection_name = "anydoc_gemini_768"
+
+[cohere]
+model_name = "embed-multilingual-light-v3.0"
+collection_name = "anydoc_cohere_384"
+
+[ingesta]
+archivos = [
+    "../documents/promociones_telas_ortelana.pdf",
+    "../documents/promociones_envios_distribucion_ortelana.docx",
+    "../documents/reglas_alta_distribuidores_ortelana.pdf",
+]
+category = "promociones"
+
+[chunking]
+size = 800
+overlap = 120
+
+[consulta]
+texto = "como se aplica el descuento"
+k = 3
+
+[vectorstore]
+persist_dir = "chroma_db"
+
+# ---------------------------------------------------------------------------
+# rag_inferencia.py: router + RAG sobre la misma base (usa [embeddings],
+# [huggingface|gemini|cohere] y [vectorstore] de arriba).
+# ---------------------------------------------------------------------------
+
+[llm]
+router_model = "gemini-2.5-flash-lite"
+router_temperature = 0.0
+rag_model = "gemini-2.5-flash"
+rag_temperature = 0.0
+
+[retrieval]
+k_candidatos = 10                 # bi-encoder: cuántos traer de Chroma
+top_n = 4                         # reranker: cuántos pasar al LLM
+
+[reranker]
+tipo = "crossencoder"             # crossencoder | cohere
+crossencoder_model = "cross-encoder/ms-marco-MiniLM-L-6-v2"
+cohere_model = "rerank-multilingual-v3.0"
+
+[inferencia]
+preguntas = [
+    "cuanto stock hay de notebook",
+    "que promociones hay para monitor",
+    "cuales son los pasos para dar de alta un distribuidor",
+    "quien gano el mundial 2022",
+]
