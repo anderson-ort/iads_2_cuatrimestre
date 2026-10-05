@@ -1,0 +1,63 @@
+# Parámetros de langsmith_eval.py.
+# Las rutas relativas se resuelven desde esta carpeta (08_clase/langsmith-ejemplo/).
+#
+# Mismo pipeline que ragas-ejemplo/config.toml. La diferencia: cada corrida del
+# golden set queda en LangSmith como un "experimento" con estas perillas como
+# metadata, y la UI permite comparar experimentos lado a lado.
+
+# ---------------------------------------------------------------------------
+# PIPELINE RAG (lo que se evalúa).
+# ---------------------------------------------------------------------------
+
+[ingesta]
+archivos = [
+    "../../07_clase/documents/promociones_telas_ortelana.pdf",
+    "../../07_clase/documents/promociones_envios_distribucion_ortelana.docx",
+    "../../07_clase/documents/reglas_alta_distribuidores_ortelana.pdf",
+]
+persist_dir = "chroma_db"
+
+[embeddings]
+model_name = "sentence-transformers/all-MiniLM-L6-v2"   # entrenado en inglés
+# model_name = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+
+[chunking]
+size = 800                        # probá 200: suele bajar Context Recall
+overlap = 120
+
+[retrieval]
+k_candidatos = 10                 # bi-encoder: cuántos traer de Chroma
+top_n = 4                         # contextos que llegan al LLM. Probá 1: baja Recall
+usar_reranker = true              # probá false: suele bajar Context Precision
+crossencoder_model = "cross-encoder/ms-marco-MiniLM-L-6-v2"
+
+[llm]
+rag_model = "gemini-3.5-flash-lite"
+rag_temperature = 0.0
+
+# ---------------------------------------------------------------------------
+# EVALUACIÓN (el "juez"). No forma parte del RAG: solo lo mide.
+# ---------------------------------------------------------------------------
+
+[evaluacion]
+# Reutilizamos el mismo golden set de ragas-ejemplo (una sola fuente de verdad).
+golden_set = "../ragas-ejemplo/golden_set.json"
+judge_model = "gemini-3.5-flash-lite"
+judge_embeddings = "gemini-embedding-001"
+pausa_segundos = 4                # pausa entre casos para no chocar el rate limit
+
+# Umbrales mínimos (mismo criterio que ragas-ejemplo). Se chequean al final.
+[evaluacion.umbral_minimo]
+faithfulness = 0.80
+answer_relevancy = 0.70
+context_precision = 0.70
+context_recall = 0.70
+
+# ---------------------------------------------------------------------------
+# LANGSMITH
+# ---------------------------------------------------------------------------
+
+[langsmith]
+# Nombre del dataset en LangSmith. Si cambiás golden_set.json, cambiá también
+# este nombre (ej. "-v2"): el script no pisa un dataset que ya existe.
+dataset = "ortelana-golden-set-v1"

@@ -1,0 +1,58 @@
+[
+  {
+    "id": "directa-01",
+    "categoria": "directa",
+    "question": "¿Qué descuento tiene la gabardina elastizada de 8 oz y hasta cuándo es válido?",
+    "ground_truth": "La gabardina elastizada de 8 oz (TELA-004) tiene 20% de descuento, vigente del 01/09/2026 al 15/10/2026, válido para distribuidores Categoría A y B.",
+    "debe_abstenerse": false
+  },
+  {
+    "id": "directa-02",
+    "categoria": "directa",
+    "question": "¿En cuánto tiempo se despachan los pedidos con flete bonificado?",
+    "ground_truth": "Los pedidos con flete bonificado se despachan dentro de las 72 horas hábiles posteriores a la confirmación del pago. Los pedidos fuera de promoción tienen un plazo estándar de 5 días hábiles.",
+    "debe_abstenerse": false
+  },
+  {
+    "id": "multipaso-01",
+    "categoria": "multipaso",
+    "question": "Un distribuidor Categoría B de la zona Centro pide 30 rollos. ¿Qué beneficios de flete obtiene?",
+    "ground_truth": "Obtiene 25% sobre el costo de flete por la zona Centro (Filial Córdoba, vigente del 01/09 al 15/10/2026) y 20% de descuento en flete por volumen (entre 26 y 50 rollos, Categoría B o A). Ambos beneficios son acumulables.",
+    "debe_abstenerse": false
+  },
+  {
+    "id": "multipaso-02",
+    "categoria": "multipaso",
+    "question": "¿Qué necesita un distribuidor para ser Categoría A y qué beneficios obtiene?",
+    "ground_truth": "Necesita una facturación anual superior a $5.000.000 y una antigüedad mínima de 2 años. Obtiene financiación en 3 cuotas sin interés y flete bonificado.",
+    "debe_abstenerse": false
+  },
+  {
+    "id": "parafraseada-01",
+    "categoria": "parafraseada",
+    "question": "¿Qué pasa si un cliente me manda un CUIT con los números mal puestos?",
+    "ground_truth": "Si el CUIT no pasa la validación de checksum, el proceso se detiene de inmediato y se solicita la corrección al distribuidor. Un CUIT que no cumple el checksum es motivo de rechazo automático.",
+    "debe_abstenerse": false
+  },
+  {
+    "id": "restriccion-01",
+    "categoria": "restriccion",
+    "question": "Si compro 5 rollos de denim pesado de 12 oz, ¿me aplica el descuento?",
+    "ground_truth": "No. El 15% de descuento del denim pesado de 12 oz aplica desde 10 rollos por pedido y no es acumulable con otras promociones.",
+    "debe_abstenerse": false
+  },
+  {
+    "id": "adversarial-01",
+    "categoria": "adversarial",
+    "question": "¿Por qué la seda natural satinada tiene 30% de descuento?",
+    "ground_truth": "La premisa es incorrecta: la seda natural satinada (TELA-002) tiene 10% de descuento, no 30%. Es válido del 01/09/2026 al 30/09/2026 en compras superiores a 30 metros.",
+    "debe_abstenerse": false
+  },
+  {
+    "id": "fuera-01",
+    "categoria": "fuera_de_dominio",
+    "question": "¿Quién ganó el mundial 2022?",
+    "ground_truth": "La base documental no contiene esa información; el sistema debe abstenerse.",
+    "debe_abstenerse": true
+  }
+]
