@@ -1,0 +1,149 @@
+{
+  "sucursales": ["Buenos Aires", "Córdoba", "Rosario"],
+  "clientes": [
+    {
+      "cuit": "30712345678",
+      "nombre": "Textiles Norpatagonia S.A.",
+      "credito_ars": 500000,
+      "distribuidor": true
+    },
+    {
+      "cuit": "20345567892",
+      "nombre": "Modas del Sur S.R.L.",
+      "credito_ars": 150000,
+      "distribuidor": false
+    },
+    {
+      "cuit": "30716677889",
+      "nombre": "Confecciones Tucumán S.A.",
+      "credito_ars": 250000,
+      "distribuidor": false
+    },
+    {
+      "cuit": "30703216549",
+      "nombre": "Denim Andino S.A.",
+      "credito_ars": 400000,
+      "distribuidor": true
+    },
+    {
+      "cuit": "30714433221",
+      "nombre": "Fibras y Colores S.A.",
+      "credito_ars": 300000,
+      "distribuidor": false
+    },
+    {
+      "cuit": "30702233445",
+      "nombre": "Modas Palermo S.A.",
+      "credito_ars": 200000,
+      "distribuidor": false
+    },
+    {
+      "cuit": "33711223344",
+      "nombre": "Cooperativa Textil La Unión Ltda.",
+      "credito_ars": 120000,
+      "distribuidor": false
+    }
+  ],
+  "productos": [
+    {
+      "id": "TEL-001",
+      "nombre": "Gabardina elastizada",
+      "categoria": "gabardinas",
+      "precio_metro_ars": 8900,
+      "descuento_pct": 15,
+      "stock_metros": { "Buenos Aires": 120, "Córdoba": 0, "Rosario": 35 }
+    },
+    {
+      "id": "TEL-002",
+      "nombre": "Gabardina rígida 100% algodón",
+      "categoria": "gabardinas",
+      "precio_metro_ars": 7600,
+      "descuento_pct": 0,
+      "stock_metros": { "Buenos Aires": 0, "Córdoba": 0, "Rosario": 0 }
+    },
+    {
+      "id": "TEL-003",
+      "nombre": "Lino natural",
+      "categoria": "linos",
+      "precio_metro_ars": 14500,
+      "descuento_pct": 10,
+      "stock_metros": { "Buenos Aires": 40, "Córdoba": 12, "Rosario": 0 }
+    },
+    {
+      "id": "TEL-004",
+      "nombre": "Lino mezcla viscosa",
+      "categoria": "linos",
+      "precio_metro_ars": 11200,
+      "descuento_pct": 0,
+      "stock_metros": { "Buenos Aires": 75, "Córdoba": 60, "Rosario": 18 }
+    },
+    {
+      "id": "TEL-005",
+      "nombre": "Jersey de algodón peinado",
+      "categoria": "punto",
+      "precio_metro_ars": 6200,
+      "descuento_pct": 20,
+      "stock_metros": { "Buenos Aires": 300, "Córdoba": 150, "Rosario": 90 }
+    },
+    {
+      "id": "TEL-006",
+      "nombre": "Frisa invisible",
+      "categoria": "punto",
+      "precio_metro_ars": 9800,
+      "descuento_pct": 0,
+      "stock_metros": { "Buenos Aires": 0, "Córdoba": 25, "Rosario": 0 }
+    },
+    {
+      "id": "TEL-007",
+      "nombre": "Denim 12 oz",
+      "categoria": "denim",
+      "precio_metro_ars": 12900,
+      "descuento_pct": 5,
+      "stock_metros": { "Buenos Aires": 210, "Córdoba": 80, "Rosario": 64 }
+    }
+  ],
+  "pedidos": [
+    {
+      "numero": "PED-1001",
+      "cliente": "Modas del Sur S.R.L.",
+      "cliente_cuit": "20345567892",
+      "fecha": "2026-09-28",
+      "sucursal_origen": "Buenos Aires",
+      "estado": "despachado",
+      "transportista": "Andreani",
+      "tracking": "AND-552310",
+      "items": [{ "producto_id": "TEL-001", "metros": 30 }]
+    },
+    {
+      "numero": "PED-1002",
+      "cliente": "Confecciones Tucumán S.A.",
+      "cliente_cuit": "30716677889",
+      "fecha": "2026-10-02",
+      "sucursal_origen": "Córdoba",
+      "estado": "en_preparacion",
+      "transportista": null,
+      "tracking": null,
+      "items": [
+        { "producto_id": "TEL-004", "metros": 20 },
+        { "producto_id": "TEL-006", "metros": 10 }
+      ]
+    },
+    {
+      "numero": "PED-1003",
+      "cliente": "Cooperativa Textil La Unión Ltda.",
+      "cliente_cuit": "33711223344",
+      "fecha": "2026-09-15",
+      "sucursal_origen": "Rosario",
+      "estado": "entregado",
+      "transportista": "OCA",
+      "tracking": "OCA-881902",
+      "fecha_entrega": "2026-09-19",
+      "items": [{ "producto_id": "TEL-007", "metros": 15 }]
+    }
+  ],
+  "politicas": {
+    "devoluciones": "Se aceptan devoluciones dentro de los 10 días corridos desde la entrega, solo de tela sin cortar y con remito. Las telas cortadas a medida no tienen devolución salvo falla de fabricación. Los pedidos aún no despachados pueden cancelarse sin costo.",
+    "envios": "Envío sin cargo en compras desde 50 metros dentro de la misma provincia de la sucursal de origen. Entre provincias el costo lo cotiza el transportista (Andreani u OCA). El despacho se realiza dentro de las 48 h hábiles de confirmado el pago.",
+    "distribuidores": "Para darse de alta como distribuidor se requiere CUIT activo, una compra inicial mínima de 300 metros y una antigüedad comercial de al menos 1 año. Los distribuidores tienen 12% de descuento adicional sobre el precio de lista."
+  }
+}
