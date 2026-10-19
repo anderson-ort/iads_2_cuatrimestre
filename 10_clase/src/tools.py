@@ -7,10 +7,11 @@ from typing import Literal
 
 import httpx
 from ddgs import DDGS
-from .config import api 
 from langchain_core.tools import tool
 
-DATOS_PATH = Path(__file__).parent / "data" / "ortelana_db.json"
+from src.config import api
+
+DATOS_PATH = Path(__file__).parent.parent / "data" / "ortelana_db.json"
 
 SECCION = Literal["productos", "clientes", "pedidos", "politicas"]
 
@@ -80,7 +81,7 @@ def consultar_cuit(cuit: str) -> str:
     cuit = re.sub(r"\D", "", cuit)
     
     if len(cuit) != 11:
-        _error("[CUIT ERROR] debe contener 11 digitos")
+        return _error("[CUIT ERROR] debe contener 11 digitos")
 
     try:
         table = os.getenv("SUPABASE_TABLE","cuit_simulado")

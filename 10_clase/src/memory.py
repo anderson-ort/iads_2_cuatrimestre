@@ -1,11 +1,13 @@
 
+import os
 import sqlite3
 
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.checkpoint.sqlite import SqliteSaver
 
 
-DB_PATH = "data/agent.sqlite.db"
+# En el container apunta a un volumen (ver compose.yaml) para sobrevivir al docker rm.
+DB_PATH = os.getenv("DB_PATH", "data/agent.sqlite.db")
 
 # Corto plazo (RAM)
 saver_volatil = MemorySaver()

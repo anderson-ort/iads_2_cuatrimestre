@@ -1,0 +1,6 @@
+*sqlite.db
+.venv
+.pytest_cache
+__pycache__
+.env
+uv.lock

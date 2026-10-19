@@ -1,0 +1,31 @@
+[project]
+name = "agentes-api"
+version = "0.1.0"
+description = "API FastAPI con orquestador LangGraph y memoria volatil/persistente (clase 10)"
+requires-python = ">=3.13"
+dependencies = [
+    "ddgs>=9.16.0",
+    "email-validator>=2.3.0",
+    "fastapi>=0.148.0",
+    "httpx>=0.28.1",
+    "langchain>=1.4.6",
+    "langchain-cohere>=0.6.0",
+    "langchain-core>=1.6.12",
+    "langchain-google-genai>=4.4.2",
+    "langgraph>=1.2.16",
+    "langgraph-checkpoint-sqlite>=3.1.2",
+    "python-dotenv>=1.2.4",
+    "uvicorn[standard]>=0.54.0",
+]
+
+[tool.uv]
+package = false
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]

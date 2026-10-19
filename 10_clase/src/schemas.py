@@ -35,3 +35,25 @@ class HealthResponse(BaseModel):
 class Ruta(BaseModel):
     agente: Literal["fiscal", "datos", "web", "general"]
 
+
+
+
+class Actividad(BaseModel):
+    descripcion: str
+    id: str
+    nomenclador: str
+    periodo: str
+
+
+class CuitResponse(BaseModel):
+    error: str = "N"
+    razon_social: str
+    condicion_impositiva: str
+    direccion: str | None = None
+    localidad: str | None = None
+    codigopostal: str | None = None
+    estado: str = "ACTIVO"
+    provincia: str | None = None
+    actividad: list[Actividad] = []
+    errores: list[str] = [""]
+

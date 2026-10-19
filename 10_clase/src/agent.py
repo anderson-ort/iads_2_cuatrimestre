@@ -6,20 +6,15 @@ START -> router -> fiscal  (buscar_datos_internos + consultar_cuit)
                 -> general (sin tools)
                       -> END
 """
-from typing import Literal
-
 from langchain.agents import create_agent
 from langchain.agents.middleware import ModelRequest, wrap_model_call
 from langchain_core.messages import SystemMessage
 from langgraph.checkpoint.base import BaseCheckpointSaver
 from langgraph.graph import END, START, MessagesState, StateGraph
-from langchain_core.messages import HumanMessage
-from langgraph.checkpoint.memory import MemorySaver
-from pydantic import BaseModel
 
 from src.config import contexto, obtener_llm, recortar
+from src.schemas import Ruta
 from src.tools import buscar_datos_internos, buscar_web, consultar_cuit
-from src.memory import saver_persistente 
 
 @wrap_model_call
 def ventana(request: ModelRequest, handler):

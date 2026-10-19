@@ -2,6 +2,7 @@ import os
 from datetime import date
 from functools import lru_cache
 
+import httpx
 from dotenv import load_dotenv
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import BaseMessage, trim_messages
@@ -37,7 +38,7 @@ def obtener_llm() -> BaseChatModel:
         from langchain_google_genai import ChatGoogleGenerativeAI
 
         return ChatGoogleGenerativeAI(
-            model=os.getenv("GENAI_MODEL", "gemini-2.5-flash"), temperature=0
+            model=os.getenv("GEMINI_MODEL", "gemini-2.5-flash"), temperature=0
         )
 
     from langchain_cohere import ChatCohere

@@ -6,10 +6,8 @@ La memoria es la lista de mensajes que se le pasa a ejecutar().
 from langchain_core.messages import BaseMessage, HumanMessage, ToolMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 
-from config import contexto, obtener_llm, recortar
-
+from src.config import MAX_PASOS, contexto, obtener_llm, recortar
 from src.tools import HERRAMIENTAS, TOOLS_POR_NOMBRE
-from src.config import MAX_PASOS, ToolMessage
 
 PROMPT = ChatPromptTemplate.from_messages([
     ("system",

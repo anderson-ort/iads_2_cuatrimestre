@@ -1,0 +1,14 @@
+services:
+  api:
+    build: .
+    container_name: agent-api
+    image: agentes-api:latest
+    ports:
+      - "8000:8000"
+    env_file: .env
+    volumes:
+      - memoria:/app/state
+    restart: unless-stopped
+
+volumes:
+  memoria:
