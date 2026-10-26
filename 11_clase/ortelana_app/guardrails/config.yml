@@ -1,0 +1,9 @@
+# NeMo Guardrails. The LLM is injected from Python (fast model in config.toml).
+rails:
+  input:
+    flows:
+      - check competitors   # deterministic, no LLM call
+      - self check input    # one call to the fast model
+  output:
+    flows:
+      - self check output   # one call to the fast model
