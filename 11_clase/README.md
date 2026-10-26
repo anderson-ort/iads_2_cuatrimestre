@@ -13,7 +13,7 @@ El sistema utiliza **LangGraph** como orquestador principal combinando nodos de 
 ![Diagrana Funcional de Ortelana](.img/ortelana_full_app_dev.jpeg)
 
 <details>
-<summary> Mermaid FlowChart </summary>
+    <summary> Mermaid FlowChart </summary>
 ```mermaid
 flowchart TD
     subgraph Client ["1. Cliente / Consumidor API"]
@@ -133,8 +133,7 @@ flowchart TD
     RagasEngine <--> RAG_Node
     RagasEngine --> MetricsReport
 
-```
-</details>
+```</details>
 ---
 
 ## 3. Especificaciones Tecnológicas (Tech Stack)
