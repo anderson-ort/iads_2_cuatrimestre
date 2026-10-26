@@ -12,129 +12,128 @@ El sistema utiliza **LangGraph** como orquestador principal combinando nodos de 
 
 ![Diagrana Funcional de Ortelana](.img/ortelana_full_app_dev.jpeg)
 
-<details>
-    <summary> Mermaid FlowChart </summary>
+## Mermaid FlowChart
+
 ```mermaid
 flowchart TD
-    subgraph Client ["1. Cliente / Consumidor API"]
-        User(["Usuario / App Frontend"])
-        EvalTrigger(["Trigger Evaluación Dataset"])
+subgraph Client ["1. Cliente / Consumidor API"]
+    User(["Usuario / App Frontend"])
+    EvalTrigger(["Trigger Evaluación Dataset"])
+end
+
+subgraph API_Layer ["2. Exposición REST API (FastAPI)"]
+    ChatEP["POST /api/v1/chat"]
+    EvalEP["POST /api/v1/eval"]
+end
+
+subgraph Safety_Layer ["3. Barrera de Seguridad (NeMo Guardrails)"]
+    NeMo_In["Input Guardrail<br/>- Off-Topic / Competidores<br/>- Validaciones de Seguridad"]
+    NeMo_Out["Output Guardrail<br/>- Formato y Tono de Respuesta"]
+end
+
+subgraph Orchestrator ["4. Orquestador LangGraph (StateGraph)"]
+    StateInit["Carga de Estado<br/>(MongoDBSaver)"]
+    RouterNode{"Router Node<br/>(Clasificación de Intención)"}
+
+    subgraph Deterministic_Nodes ["Nodos Deterministas (Código Python Directo)"]
+        RAG_Node["Nodo RAG Híbrido Directo"]
+        CUIT_Node["Nodo Consulta CUIT Directo<br/>(Supabase API)"]
+        General_Node["Nodo Conversación General"]
     end
 
-    subgraph API_Layer ["2. Exposición REST API (FastAPI)"]
-        ChatEP["POST /api/v1/chat"]
-        EvalEP["POST /api/v1/eval"]
-    end
+    subgraph ReAct_Node ["Nodo Agente ReAct (Razonamiento Dinámico / Multi-paso)"]
+        ReAct_Loop["ReAct Reasoner Loop<br/>(Thought -> Action -> Observation)"]
 
-    subgraph Safety_Layer ["3. Barrera de Seguridad (NeMo Guardrails)"]
-        NeMo_In["Input Guardrail\n- Off-Topic / Competidores\n- Validaciones de Seguridad"]
-        NeMo_Out["Output Guardrail\n- Formato y Tono de Respuesta"]
-    end
-
-    subgraph Orchestrator ["4. Orquestador LangGraph (StateGraph)"]
-        StateInit["Carga de Estado\n(MongoDBSaver)"]
-        RouterNode{"Router Node\n(Clasificación de Intención)"}
-
-        subgraph Deterministic_Nodes ["Nodos Deterministas (Código Python Directo)"]
-            RAG_Node["Nodo RAG Híbrido Directo"]
-            CUIT_Node["Nodo Consulta CUIT Directo\n(Supabase API)"]
-            General_Node["Nodo Conversación General"]
+        subgraph ReAct_Tools ["Tools del Agente ReAct"]
+            Tool_Web["SearXNG / DDG Web Search"]
+            Tool_CUIT["Tool Supabase CUIT"]
+            Tool_RAG["Tool ChromaDB RAG"]
         end
 
-        subgraph ReAct_Node ["Nodo Agente ReAct (Razonamiento Dinámico / Multi-paso)"]
-            ReAct_Loop["ReAct Reasoner Loop\n(Thought -> Action -> Observation)"]
-            
-            subgraph ReAct_Tools ["Tools del Agente ReAct"]
-                Tool_Web["SearXNG / DDG Web Search"]
-                Tool_CUIT["Tool Supabase CUIT"]
-                Tool_RAG["Tool ChromaDB RAG"]
-            end
-            
-            ReAct_Loop <--> ReAct_Tools
-        end
-
-        Synthesizer["Nodo Sintetizador / Generador"]
+        ReAct_Loop <--> ReAct_Tools
     end
 
-    subgraph HybridRAG_Engine ["5. Engine RAG Híbrido (Determinista)"]
-        QueryIn["Query Normalizada"]
-        BM25_Search["Sparse Search\n(rank-bm25)"]
-        Vector_Search["Dense Search\n(ChromaDB Engine)"]
-        RRF_Fusion["Reciprocal Rank Fusion (RRF)"]
-        CrossEncoder["CrossEncoder Reranker"]
+    Synthesizer["Nodo Sintetizador / Generador"]
+end
 
-        QueryIn --> BM25_Search
-        QueryIn --> Vector_Search
-        BM25_Search --> RRF_Fusion
-        Vector_Search --> RRF_Fusion
-        RRF_Fusion --> CrossEncoder
-    end
+subgraph HybridRAG_Engine ["5. Engine RAG Híbrido (Determinista)"]
+    QueryIn["Query Normalizada"]
+    BM25_Search["Sparse Search<br/>(rank-bm25)"]
+    Vector_Search["Dense Search<br/>(ChromaDB Engine)"]
+    RRF_Fusion["Reciprocal Rank Fusion (RRF)"]
+    CrossEncoder["CrossEncoder Reranker"]
 
-    subgraph Data_Stores ["6. Persistencia y Servicios"]
-        ChromaDB[("ChromaDB Local\n- Descuentos y Promociones\n- Reglas Altas Distribuidores")]
-        MongoDB[("MongoDB Store\n- LangGraph Checkpointer\n- Chat History / Sesiones")]
-        SupabaseDB[("Supabase API\n- Padrón CUIT / Datos Fiscales")]
-        SearXNG_Service["SearXNG (Docker) / DDG"]
-    end
+    QueryIn --> BM25_Search
+    QueryIn --> Vector_Search
+    BM25_Search --> RRF_Fusion
+    Vector_Search --> RRF_Fusion
+    RRF_Fusion --> CrossEncoder
+end
 
-    subgraph Observability ["7. Monitoreo (LangSmith)"]
-        LangSmith["LangSmith Tracing\n(Traces, Costos, Latencia)"]
-    end
+subgraph Data_Stores ["6. Persistencia y Servicios"]
+    ChromaDB[("ChromaDB Local<br/>- Descuentos y Promociones<br/>- Reglas Altas Distribuidores")]
+    MongoDB[("MongoDB Store<br/>- LangGraph Checkpointer<br/>- Chat History / Sesiones")]
+    SupabaseDB[("Supabase API<br/>- Padrón CUIT / Datos Fiscales")]
+    SearXNG_Service["SearXNG (Docker) / DDG"]
+end
 
-    subgraph Evaluation ["8. Evaluación de Calidad (RAGAS)"]
-        TestDataset["Dataset de Pruebas (JSON/CSV)"]
-        RagasEngine["RAGAS Evaluator\n- Faithfulness\n- Answer Relevance\n- Context Precision / Recall"]
-        MetricsReport["Métricas y Logs"]
-    end
+subgraph Observability ["7. Monitoreo (LangSmith)"]
+    LangSmith["LangSmith Tracing<br/>(Traces, Costos, Latencia)"]
+end
 
-    %% Flujo Principal
-    User -->|"Request {user_id, session_id, message}"| ChatEP
-    ChatEP --> NeMo_In
-    NeMo_In -->|Aprobado| StateInit
-    NeMo_In -.->|Redirección Educada| ChatEP
+subgraph Evaluation ["8. Evaluación de Calidad (RAGAS)"]
+    TestDataset["Dataset de Pruebas (JSON/CSV)"]
+    RagasEngine["RAGAS Evaluator<br/>- Faithfulness<br/>- Answer Relevance<br/>- Context Precision / Recall"]
+    MetricsReport["Métricas y Logs"]
+end
 
-    StateInit <-->|Carga / Guarda Estado| MongoDB
-    StateInit --> RouterNode
+%% Flujo Principal
+User -->|"Request {user_id, session_id, message}"| ChatEP
+ChatEP --> NeMo_In
+NeMo_In -->|Aprobado| StateInit
+NeMo_In -.->|Redirección Educada| ChatEP
 
-    %% Routing
-    RouterNode -->|Consulta RAG Estándar| RAG_Node
-    RouterNode -->|Validación CUIT Simple| CUIT_Node
-    RouterNode -->|Consulta Compleja / Web / Multi-step| ReAct_Loop
-    RouterNode -->|Saludo / Conversación General| General_Node
+StateInit <-->|Carga / Guarda Estado| MongoDB
+StateInit --> RouterNode
 
-    %% Conexiones Nodos Deterministas
-    RAG_Node --> HybridRAG_Engine
-    HybridRAG_Engine <-->|Búsqueda Vectorial| ChromaDB
-    CrossEncoder --> Synthesizer
+%% Routing
+RouterNode -->|Consulta RAG Estándar| RAG_Node
+RouterNode -->|Validación CUIT Simple| CUIT_Node
+RouterNode -->|Consulta Compleja / Web / Multi-step| ReAct_Loop
+RouterNode -->|Saludo / Conversación General| General_Node
 
-    CUIT_Node <-->|HTTPS REST| SupabaseDB
-    CUIT_Node --> Synthesizer
+%% Conexiones Nodos Deterministas
+RAG_Node --> HybridRAG_Engine
+HybridRAG_Engine <-->|Búsqueda Vectorial| ChromaDB
+CrossEncoder --> Synthesizer
 
-    General_Node --> Synthesizer
+CUIT_Node <-->|HTTPS REST| SupabaseDB
+CUIT_Node --> Synthesizer
 
-    %% Conexiones ReAct Tools
-    Tool_Web <-->|Search Query| SearXNG_Service
-    Tool_CUIT <-->|HTTPS REST| SupabaseDB
-    Tool_RAG <-->|Vector & BM25| ChromaDB
-    ReAct_Loop --> Synthesizer
+General_Node --> Synthesizer
 
-    %% Salida
-    Synthesizer --> NeMo_Out
-    NeMo_Out --> ChatEP
+%% Conexiones ReAct Tools
+Tool_Web <-->|Search Query| SearXNG_Service
+Tool_CUIT <-->|HTTPS REST| SupabaseDB
+Tool_RAG <-->|Vector y BM25| ChromaDB
+ReAct_Loop --> Synthesizer
 
-    %% Observabilidad
-    Orchestrator -.->|Traces| LangSmith
-    API_Layer -.->|Traces| LangSmith
+%% Salida
+Synthesizer --> NeMo_Out
+NeMo_Out --> ChatEP
 
-    %% Evaluación RAGAS
-    EvalTrigger -->|Ejecutar Pruebas| EvalEP
-    EvalEP --> RagasEngine
-    TestDataset --> RagasEngine
-    RagasEngine <--> RAG_Node
-    RagasEngine --> MetricsReport
+%% Observabilidad
+Orchestrator -.->|Traces| LangSmith
+API_Layer -.->|Traces| LangSmith
 
-```</details>
----
+%% Evaluación RAGAS
+EvalTrigger -->|Ejecutar Pruebas| EvalEP
+EvalEP --> RagasEngine
+TestDataset --> RagasEngine
+RagasEngine <--> RAG_Node
+RagasEngine --> MetricsReport
+```
+
 
 ## 3. Especificaciones Tecnológicas (Tech Stack)
 
