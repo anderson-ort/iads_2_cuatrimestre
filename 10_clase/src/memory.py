@@ -1,4 +1,4 @@
-
+from pathlib import Path
 import os
 import sqlite3
 
@@ -12,6 +12,7 @@ DB_PATH = os.getenv("DB_PATH", "data/agent.sqlite.db")
 # Corto plazo (RAM)
 saver_volatil = MemorySaver()
 
+Path(DB_PATH).parent.mkdir(parents=True,exist_ok=True)
 # Largo plazo (SQLite). check_same_thread=False porque FastAPI usa un threadpool.
 saver_persistente = SqliteSaver(sqlite3.connect(DB_PATH, check_same_thread=False))
 

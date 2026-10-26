@@ -8,6 +8,7 @@ services:
     env_file: .env
     volumes:
       - memoria:/app/state
+      - ./data:/app/data
     restart: unless-stopped
 
 volumes:
