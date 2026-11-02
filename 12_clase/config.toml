@@ -1,0 +1,66 @@
+# Configuracion no secreta. Los secretos van en .env (ver .env.sample).
+# Las rutas relativas se resuelven desde esta carpeta (11_clase/ortelana_app/).
+
+[llm]
+provider = "google"                     # "google" | "cohere"
+temperature = 0.0
+
+[llm.google]
+chat_model = "gemini-2.5-flash"         # sintetizador y agente ReAct
+fast_model = "gemini-3.5-flash-lite"    # router: clasificacion barata
+embedding_model = "gemini-embedding-001"
+embedding_dimensions = 768
+
+[llm.cohere]
+chat_model = "command-a-03-2025"
+fast_model = "command-a-03-2025"
+embedding_model = "embed-multilingual-light-v3.0"   # dimension fija: 384
+
+[ingest]
+documents_dir = "data/documents"        # source documents (ingest stage)
+chunk_size = 800
+chunk_overlap = 120
+
+[mongo]
+catalog_database = "ortelana-app-database"
+catalog_collection = "catalogo"
+checkpoint_database = "ortelana-checkpoints"
+
+[chroma]
+persist_dir = "data/chroma_db"
+collection = "ortelana_knowledge"       # documentos + catalogo, metadato "tipo"
+                                        # se agrega el sufijo del provider: cada uno tiene otra dimension
+
+[retrieval]
+k_candidates = 10                       # candidatos por buscador (BM25 y vector)
+rrf_k = 60
+top_n = 4                               # contextos que llegan al LLM
+rerank_model = "rerank-multilingual-v3.0"
+
+[supabase]
+url = "https://fblwzffybkylbveornpg.supabase.co"
+table = "cuit_simulado"
+timeout_seconds = 10
+
+[web]
+searxng_url = "http://localhost:8888"
+max_results = 5
+timeout_seconds = 10
+
+[guardrails]
+config_dir = "guardrails"               # config.yml + rails.co + prompts.yml de NeMo
+competitors = ["Textil Rival", "Telas del Norte"]   # ejemplo: reemplazar por los competidores reales
+
+[api]
+host = "0.0.0.0"
+port = 8000
+
+[langsmith]
+tracing = true
+project = "ortelana-app"
+
+[evaluation]
+datasets_dir = "data/eval"              # <dataset_name>.json, p. ej. eval_ortelana_v1 (5 casos)
+judge_model = "gemini-3.5-flash-lite"   # juez de RAGAS: siempre Gemini (RAGAS no tiene ruta Cohere)
+judge_embedding_model = "gemini-embedding-001"
+retry_wait_seconds = 30                 # espera ante 429/503 del free tier

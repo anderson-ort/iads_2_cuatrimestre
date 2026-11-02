@@ -1,0 +1,11 @@
+define bot refuse to respond
+  "Disculpá, solo puedo ayudarte con consultas sobre telas, promociones, envíos y altas de distribuidores de Ortelana Textil."
+
+define bot redirect to ortelana
+  "No puedo darte información sobre otras empresas, pero con gusto te ayudo a encontrar la tela que necesitás en Ortelana Textil. ¿Qué estás buscando?"
+
+define flow check competitors
+  $mentions = execute mentions_competitor
+  if $mentions
+    bot redirect to ortelana
+    stop

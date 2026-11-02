@@ -1,0 +1,27 @@
+[
+  {
+    "id": "directa-01",
+    "question": "¿Qué descuento tiene la gabardina elastizada de 8 oz y hasta cuándo es válido?",
+    "ground_truth": "La gabardina elastizada de 8 oz (TELA-004) tiene 20% de descuento, vigente del 01/09/2026 al 15/10/2026, válido para distribuidores Categoría A y B."
+  },
+  {
+    "id": "directa-02",
+    "question": "¿En cuánto tiempo se despachan los pedidos con flete bonificado?",
+    "ground_truth": "Los pedidos con flete bonificado se despachan dentro de las 72 horas hábiles posteriores a la confirmación del pago. Los pedidos fuera de promoción tienen un plazo estándar de 5 días hábiles."
+  },
+  {
+    "id": "multipaso-01",
+    "question": "Un distribuidor Categoría B de la zona Centro pide 30 rollos. ¿Qué beneficios de flete obtiene?",
+    "ground_truth": "Obtiene 25% sobre el costo de flete por la zona Centro (Filial Córdoba, vigente del 01/09 al 15/10/2026) y 20% de descuento en flete por volumen (entre 26 y 50 rollos, Categoría B o A). Ambos beneficios son acumulables."
+  },
+  {
+    "id": "parafraseada-01",
+    "question": "¿Qué pasa si un cliente me manda un CUIT con los números mal puestos?",
+    "ground_truth": "Si el CUIT no pasa la validación de checksum, el proceso se detiene de inmediato y se solicita la corrección al distribuidor. Un CUIT que no cumple el checksum es motivo de rechazo automático."
+  },
+  {
+    "id": "restriccion-01",
+    "question": "Si compro 5 rollos de denim pesado de 12 oz, ¿me aplica el descuento?",
+    "ground_truth": "No. El 15% de descuento del denim pesado de 12 oz aplica desde 10 rollos por pedido y no es acumulable con otras promociones."
+  }
+]

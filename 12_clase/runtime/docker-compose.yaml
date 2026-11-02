@@ -1,0 +1,25 @@
+# Local run of the runtime stage plus its SearXNG sidecar.
+# The API uses host networking so the URLs in config.toml (localhost:8888 for SearXNG)
+# work the same inside and outside Docker. Run from 12_clase/runtime/:
+#   docker compose up -d --build
+services:
+  searxng:
+    # image: searxng/searxng:2026.10.23-629368e40
+    image: searxng/searxng:latest
+    ports:
+      - "8888:8080"
+    environment:
+      SEARXNG_SECRET: ${SEARXNG_SECRET:?set SEARXNG_SECRET in ../.env}
+    volumes:
+      - ./searxng/settings.yml:/etc/searxng/settings.yml:ro
+    restart: unless-stopped
+
+  api:
+    build:
+      context: ..
+      dockerfile: runtime/Dockerfile
+    network_mode: host
+    env_file: ../.env
+    depends_on:
+      - searxng
+    restart: unless-stopped

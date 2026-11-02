@@ -1,0 +1,54 @@
+[project]
+name = "ortelana"
+version = "0.1.0"
+description = "Ortelana assistant split into three stages: runtime, ingest and eval"
+requires-python = ">=3.13"
+# Nothing is installed by default: always pick a stage with `uv sync --only-group <stage>`.
+dependencies = []
+
+[tool.uv]
+package = false
+
+[dependency-groups]
+# Internal building blocks shared by several stages.
+core = [
+    "pydantic-settings>=2.16.1",
+    "langchain-core>=1.7.0",
+    "langchain-chroma>=1.1.0",
+    "langchain-cohere>=0.6.0",
+    "langchain-google-genai>=4.4.2",
+    "rank-bm25>=0.2.2",
+]
+agent = [
+    "langchain>=1.4.7",
+    "langgraph>=1.2.17",
+    "httpx>=0.28.1",
+    "ddgs>=9.16.1",
+]
+
+# The three stages.
+runtime = [
+    { include-group = "core" },
+    { include-group = "agent" },
+    "fastapi>=0.162.0",
+    "uvicorn[standard]>=0.54.0",
+    "langgraph-checkpoint-mongodb>=0.5.1",
+    "pymongo>=4.19.0",
+    "nemoguardrails>=0.24.1",
+]
+ingest = [
+    { include-group = "core" },
+    "firecrawl-anydoc>=0.2.4",
+    "langchain-text-splitters>=1.1.3",
+    "pymongo>=4.19.0",
+]
+eval = [
+    { include-group = "core" },
+    { include-group = "agent" },
+    "ragas>=0.4.3",
+    "openai>=2,<3",
+    "langchain-community<0.4.2",
+]
+
+[tool.ruff]
+line-length = 100

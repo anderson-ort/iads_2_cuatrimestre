@@ -1,0 +1,9 @@
+# Minimal SearXNG config: defaults plus the JSON API used by src/web.py.
+# The secret key comes from SEARXNG_SECRET (.env), never from this file.
+use_default_settings: true
+server:
+  limiter: false
+search:
+  formats:
+    - html
+    - json
