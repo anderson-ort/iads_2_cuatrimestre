@@ -1,4 +1,4 @@
-# Ingest stage: a batch job that builds the Chroma index. Never deployed as a service.
+# Ingest stage: a batch job that builds the Atlas Vector Search index. Never deployed as a service.
 # Build from the 12_clase/ folder:
 #   docker build -f ingest/Dockerfile -t ortelana-ingest .
 FROM python:3.13-slim AS builder
@@ -32,6 +32,5 @@ COPY --chown=app ingest ./ingest
 
 RUN python -c "import ingest.main"
 
-# data/ is mounted: documents are read from data/documents, the index is written to
-# data/chroma_db on the host.
+# data/ is mounted: documents are read from data/documents; the index is written to MongoDB Atlas.
 CMD ["python", "-m", "ingest.main"]

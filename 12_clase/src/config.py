@@ -45,9 +45,10 @@ class MongoConfig(BaseModel):
     checkpoint_database: str
 
 
-class ChromaConfig(BaseModel):
-    persist_dir: Path
+class VectorStoreConfig(BaseModel):
+    database: str
     collection: str
+    index: str
 
 
 class RetrievalConfig(BaseModel):
@@ -106,7 +107,7 @@ class Settings(BaseModel):
     llm: LLMConfig
     ingest: IngestConfig
     mongo: MongoConfig
-    chroma: ChromaConfig
+    vectorstore: VectorStoreConfig
     retrieval: RetrievalConfig
     supabase: SupabaseConfig
     web: WebConfig
@@ -119,7 +120,7 @@ class Settings(BaseModel):
     @property
     def collection_name(self) -> str:
         # Each provider produces vectors of a different dimension.
-        return f"{self.chroma.collection}_{self.llm.provider}"
+        return f"{self.vectorstore.collection}_{self.llm.provider}"
 
     def path(self, relative: Path) -> Path:
         return self.root / relative

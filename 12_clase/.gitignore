@@ -1,5 +1,3 @@
-# Built by the ingest stage; never versioned.
-data/chroma_db/
 .venv/
 .env
 __pycache__/

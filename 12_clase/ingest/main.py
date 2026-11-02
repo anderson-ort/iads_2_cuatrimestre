@@ -1,4 +1,4 @@
-"""Ingest stage: documents + Mongo catalog -> Chroma index (data/chroma_db).
+"""Ingest stage: documents + Mongo catalog -> Atlas Vector Search index.
 
 python -m ingest.main
 """

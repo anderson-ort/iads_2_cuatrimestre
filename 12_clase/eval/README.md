@@ -5,7 +5,7 @@ Job por lotes que **no se despliega**. Corre RAGAS sobre el camino RAG
 promover una versión a producción.
 
 ```
- data/chroma_db (de ingest) ─┐
+ Atlas Vector Search (de ingest) ─┐
  data/eval/<dataset>.json ───┴─> retrieve + synthesize ─> juez RAGAS (Gemini) ─> scores
 ```
 

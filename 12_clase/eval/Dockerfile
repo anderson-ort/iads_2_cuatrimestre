@@ -33,6 +33,5 @@ COPY --chown=app eval ./eval
 
 RUN python -c "import eval.main"
 
-# data/ is mounted: the index comes from data/chroma_db (built by ingest) and the golden
-# sets from data/eval. The dataset name is the container argument.
+# data/ is mounted for the golden sets in data/eval; the index is read from MongoDB Atlas (built by ingest). The dataset name is the container argument.
 CMD ["python", "-m", "eval.main"]

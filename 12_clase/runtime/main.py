@@ -40,7 +40,7 @@ def build_orchestrator(
 def ask(settings: Settings, session_id: str, message: str) -> None:
     with MongoClient(settings.secrets.mongodb_uri.get_secret_value()) as client:
         saver = MongoDBSaver(client, db_name=settings.mongo.checkpoint_database)
-        graph = build_orchestrator(settings, build_retriever(settings), saver)
+        graph = build_orchestrator(settings, build_retriever(settings, client), saver)
         state = graph.invoke(
             {"messages": [("human", message)]}, {"configurable": {"thread_id": session_id}}
         )
@@ -53,8 +53,8 @@ def serve(settings: Settings) -> None:
         chat_model(settings, fast=True),
         settings.guardrails.competitors,
     )
-    retriever = build_retriever(settings)
     with MongoClient(settings.secrets.mongodb_uri.get_secret_value()) as client:
+        retriever = build_retriever(settings, client)
         saver = MongoDBSaver(client, db_name=settings.mongo.checkpoint_database)
         app = create_app(build_orchestrator(settings, retriever, saver), guardrails)
         uvicorn.run(app, host=settings.api.host, port=settings.api.port)
@@ -75,9 +75,10 @@ def main() -> None:
     settings = load_settings()
     configure_tracing(settings)
     if args.command == "search":
-        for doc in build_retriever(settings).search(args.query):
-            score = doc.metadata.get("relevance_score", 0.0)
-            print(f"[{score:.3f}] {doc.id} ({doc.metadata['tipo']}): {doc.page_content[:120]}")
+        with MongoClient(settings.secrets.mongodb_uri.get_secret_value()) as client:
+            for doc in build_retriever(settings, client).search(args.query):
+                score = doc.metadata.get("relevance_score", 0.0)
+                print(f"[{score:.3f}] {doc.id} ({doc.metadata['tipo']}): {doc.page_content[:120]}")
     elif args.command == "ask":
         ask(settings, args.session, args.message)
     else:

@@ -4,7 +4,7 @@ Es la **única etapa que se despliega**. Sirve la API REST del asistente de Orte
 
 ```
 Cliente -> FastAPI -> NeMo input rails -> Orquestador LangGraph -> NeMo output rails -> Cliente
-                                           |-- rag_direct   (BM25 + Chroma + RRF + rerank)
+                                           |-- rag_direct   (BM25 + Atlas Vector Search + RRF + rerank)
                                            |-- cuit_direct  (Supabase)
                                            |-- react_agent  (RAG + CUIT + web)
                                            `-- general
@@ -23,7 +23,7 @@ Memoria de conversación en MongoDB (`thread_id = session_id`), trazas en LangSm
 
 ## Dependencias (grupo `runtime`)
 
-`core` + `agent` + `fastapi` + `uvicorn` + `nemoguardrails` + `langgraph-checkpoint-mongodb` + `pymongo`.
+`core` (incluye `langchain-mongodb` y `pymongo`) + `agent` + `fastapi` + `uvicorn` + `nemoguardrails` + `langgraph-checkpoint-mongodb`.
 No incluye `ragas`, `openai`, `langchain-community` ni `anydoc`.
 
 Medido con `uv sync` + Docker: **146 paquetes** y venv de **537 MB**, contra 168 paquetes y 940 MB
@@ -31,8 +31,11 @@ del proyecto original; imagen de **1,11 GB** contra 1,88 GB.
 
 ## Requisito previo: el índice
 
-La imagen **incluye** `data/chroma_db`, construido por la etapa `ingest`. Sin esa carpeta
-`docker build` falla en el `COPY`. Para actualizar el catálogo: correr `ingest` y reconstruir la imagen.
+El índice vectorial vive en **MongoDB Atlas** (colección `knowledge_<provider>`), construido por
+la etapa `ingest`. La imagen ya **no** lo incluye: el contenedor lo lee al arrancar (también arma
+BM25 en memoria con esos chunks). Para actualizar el catálogo: correr `ingest` y **reiniciar** el
+servicio; no hace falta reconstruir la imagen. Si el índice está vacío, el arranque falla con
+`Empty index: run ingest first`. Detalle y motivo: [`../ATLAS_VECTOR_SEARCH.md`](../ATLAS_VECTOR_SEARCH.md).
 
 ## Ejecutar
 
@@ -71,6 +74,6 @@ no un archivo `.env`.
 
 | Etapa | Rol | Se despliega | Grupo |
 |---|---|---|---|
-| `ingest` | Construye `data/chroma_db` | No (job) | `ingest` |
+| `ingest` | Construye el índice en Atlas | No (job) | `ingest` |
 | `runtime` | Sirve `/api/v1/chat` | **Sí** | `runtime` |
 | `eval` | Puntúa el RAG con RAGAS | No (job) | `eval` |

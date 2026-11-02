@@ -1,10 +1,12 @@
-"""Eval stage: RAGAS over the RAG path, reading the index built by the ingest stage.
+"""Eval stage: RAGAS over the RAG path, reading the Atlas index built by the ingest stage.
 
 python -m eval.main [dataset_name]
 """
 
 import argparse
 import logging
+
+from pymongo import MongoClient
 
 from src.config import configure_tracing, load_settings
 from src.evaluation import DEFAULT_METRICS, build_evaluator
@@ -20,8 +22,11 @@ def main() -> None:
 
     settings = load_settings()
     configure_tracing(settings)
-    evaluator = build_evaluator(settings, build_retriever(settings), chat_model(settings))
-    print(evaluator(args.dataset_name, DEFAULT_METRICS))
+    with MongoClient(settings.secrets.mongodb_uri.get_secret_value()) as client:
+        evaluator = build_evaluator(
+            settings, build_retriever(settings, client), chat_model(settings)
+        )
+        print(evaluator(args.dataset_name, DEFAULT_METRICS))
 
 
 if __name__ == "__main__":

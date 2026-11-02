@@ -1,5 +1,6 @@
 # Runtime stage: the only image that goes to production.
-# Build from the 12_clase/ folder, after the ingest stage produced data/chroma_db:
+# The vector index lives in MongoDB Atlas (built by the ingest stage), not in the image.
+# Build from the 12_clase/ folder:
 #   docker build -f runtime/Dockerfile -t ortelana-runtime .
 FROM python:3.13-slim AS builder
 
@@ -34,9 +35,6 @@ COPY --chown=app src/__init__.py src/config.py src/llm.py src/retrieval.py src/p
     src/cuit.py src/web.py src/tools.py src/graph.py src/guardrails.py src/schemas.py \
     src/api.py ./src/
 COPY --chown=app runtime ./runtime
-# Read-only index built by the ingest stage, baked into the image. Mount a volume on
-# /app/data to override it without rebuilding.
-COPY --chown=app data/chroma_db ./data/chroma_db
 
 # Fail the build, not the first request, if a module is missing from the COPY list above.
 RUN python -c "import runtime.main"
