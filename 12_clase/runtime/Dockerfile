@@ -30,11 +30,12 @@ WORKDIR /app
 COPY --from=builder --chown=app /app/.venv ./.venv
 
 COPY --chown=app config.toml ./
-COPY --chown=app guardrails ./guardrails
-COPY --chown=app src/__init__.py src/config.py src/llm.py src/retrieval.py src/prompts.py \
+# COPY --chown=app guardrails ./guardrails
+COPY --chown=app ./guardrails ./guardrails
+COPY --chown=app ./src/__init__.py ./src/config.py ./src/llm.py ./src/retrieval.py ./src/prompts.py \
     src/cuit.py src/web.py src/tools.py src/graph.py src/guardrails.py src/schemas.py \
     src/api.py ./src/
-COPY --chown=app runtime ./runtime
+COPY --chown=app ./runtime ./runtime
 
 # Fail the build, not the first request, if a module is missing from the COPY list above.
 RUN python -c "import runtime.main"

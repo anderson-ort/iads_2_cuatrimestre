@@ -8,8 +8,9 @@ services:
     image: searxng/searxng:latest
     ports:
       - "8888:8080"
-    environment:
-      SEARXNG_SECRET: ${SEARXNG_SECRET:?set SEARXNG_SECRET in ../.env}
+    # environment:
+    #   SEARXNG_SECRET: ${SEARXNG_SECRET:?set SEARXNG_SECRET in ../.env}
+    env_file: ../.env
     volumes:
       - ./searxng/settings.yml:/etc/searxng/settings.yml:ro
     restart: unless-stopped
@@ -18,6 +19,7 @@ services:
     build:
       context: ..
       dockerfile: runtime/Dockerfile
+    container_name: rest-api
     network_mode: host
     env_file: ../.env
     depends_on:
